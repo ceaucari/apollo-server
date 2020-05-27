@@ -1,1 +1,2 @@
 - add ESLint unused rules
+- Adjust error messages in resolvers
