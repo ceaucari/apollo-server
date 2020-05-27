@@ -1,2 +1,3 @@
 - add ESLint unused rules
 - Adjust error messages in resolvers
+- move the isAuth file to Utils folder
