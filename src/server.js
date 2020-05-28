@@ -1,8 +1,9 @@
+import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
-import BasicLogging from './utils/BasicLogging';
+// import BasicLogging from './utils/BasicLogging';
 
 import schema from './schema';
 import resolvers from './resolvers';
@@ -33,7 +34,8 @@ const server = new ApolloServer({
     // leave only the important validation error
     const message = error.message
       .replace('SequelizeValidationError: ', '')
-      .replace('Validation error: ', '');
+      .replace('Validation error: ', '')
+      .replace('Context creation failed: ', '');
 
     return {
       ...error,
@@ -52,12 +54,6 @@ const server = new ApolloServer({
 });
 
 server.applyMiddleware({ app, path: '/graphql' });
-
-// sequelize.sync().then(async () => {
-//   app.listen({ port: 8000 }, () => {
-//     console.log('Apollo Server on http://localhost:8000/graphql');
-//   });
-// });
 
 const eraseDatabaseOnSync = true;
 
@@ -80,7 +76,7 @@ const createUsersWithMessages = async () => {
       role: 'ADMIN',
       messages: [
         {
-          text: 'Published the Road to learn React',
+          text: 'This is a message from CC',
         },
       ],
     },
