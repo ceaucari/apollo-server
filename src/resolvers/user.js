@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { AuthenticationError, UserInputError } from 'apollo-server';
 import { combineResolvers } from 'graphql-resolvers';
+import { AuthenticationError, UserInputError } from 'apollo-server';
 
-import { isAdmin } from './auth';
+import { isAdmin } from './isAuth';
 
 const createToken = async (user, secret, expiresIn) => {
   const { id, email, username, role } = user;
@@ -42,29 +42,32 @@ export default {
 
       return { token: createToken(user, secret, '90d') };
     },
+
+    signIn: async (parent, { login, password }, { models, secret }) => {
+      const user = await models.User.findByLogin(login);
+
+      if (!user) {
+        throw new UserInputError('No user found with this login credentials.');
+      }
+
+      const isValid = await user.validatePassword(password);
+
+      if (!isValid) {
+        throw new AuthenticationError('Invalid password.');
+      }
+
+      return { token: createToken(user, secret, '90d') };
+    },
+
+    deleteUser: combineResolvers(
+      isAdmin,
+      async (parent, { id }, { models }) => {
+        return await models.User.destroy({
+          where: { id },
+        });
+      }
+    ),
   },
-
-  signIn: async (parent, { login, password }, { models, secret }) => {
-    const user = await models.User.findByLogin(login);
-
-    if (!user) {
-      throw new UserInputError('No user found with this login credentials.');
-    }
-
-    const isValid = await user.validatePassword(password);
-
-    if (!isValid) {
-      throw new AuthenticationError('Invalid password.');
-    }
-
-    return { token: createToken(user, secret, '90d') };
-  },
-
-  deleteUser: combineResolvers(isAdmin, async (parent, { id }, { models }) => {
-    return await models.User.destroy({
-      where: { id },
-    });
-  }),
 
   User: {
     messages: async (user, args, { models }) => {

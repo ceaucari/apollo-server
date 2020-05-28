@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
+import BasicLogging from './utils/BasicLogging';
 
 import schema from './schema';
 import resolvers from './resolvers';
@@ -24,6 +25,7 @@ const getMe = async req => {
 };
 
 const server = new ApolloServer({
+  // extensions: [() => new BasicLogging()],
   typeDefs: schema,
   resolvers,
   formatError: error => {

@@ -1,6 +1,6 @@
 import { combineResolvers } from 'graphql-resolvers';
 
-import { isAuth, isMessageOwner } from './auth';
+import { isAuth, isMessageOwner } from './isAuth';
 
 export default {
   Query: {
