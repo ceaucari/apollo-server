@@ -47,10 +47,16 @@ export default {
     createMessage: combineResolvers(
       isAuth,
       async (parent, { text }, { models, me }) => {
-        return await models.Message.create({
+        const message = await models.Message.create({
           text,
           userId: me.id,
         });
+
+        pubsub.publish(EVENTS.MESSAGE.CREATED, {
+          messageCreated: { message },
+        });
+
+        return message;
       }
     ),
 

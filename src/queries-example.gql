@@ -112,3 +112,17 @@ query {
     }
   }
 }
+
+subscription {
+  messageCreated {
+    message {
+      id
+      text
+      createdAt
+      user {
+        id
+        username
+      }
+    }
+  }
+}
