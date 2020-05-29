@@ -90,3 +90,25 @@ query {
     createdAt
   }
 }
+
+query {
+  messages(limit: 2) {
+    edges {
+      text
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+}
+
+query {
+  messages(limit: 2, cursor: "2020-05-29T01:04:27.103Z") {
+    edges {
+      text
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+}
