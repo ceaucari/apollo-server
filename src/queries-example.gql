@@ -1,0 +1,92 @@
+mutation {
+  signUp(
+    username: "John Doe"
+    email: "john.doe@example.com"
+    password: "12345678"
+  ) {
+    token
+  }
+}
+
+mutation {
+  signIn(login: "John Doe", password: "12345678") {
+    token
+  }
+}
+
+mutation {
+  createMessage(text: "Hello!") {
+    id
+    text
+  }
+}
+
+mutation {
+  deleteUser(id: 3)
+}
+
+mutation {
+  updateUser(username: "John Doe") {
+    username
+    role
+  }
+}
+
+# Queries ------------------------------------------
+
+{
+  users {
+    username
+    role
+  }
+}
+
+{
+  user(id: "2") {
+    username
+  }
+}
+
+{
+  me {
+    username
+  }
+}
+
+{
+  message(id: "1") {
+    id
+    text
+    createdAt
+    user {
+      id
+      username
+    }
+  }
+}
+
+query {
+  messages {
+    text
+  }
+}
+
+query {
+  messages(offset: 1, limit: 2) {
+    text
+  }
+}
+
+query {
+  messages(limit: 2) {
+    text
+    createdAt
+  }
+}
+
+query {
+  messages(limit: 2, cursor: "2020-05-29T00:40:42.844Z") {
+    text
+    createdAt
+  }
+}
