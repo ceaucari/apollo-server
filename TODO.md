@@ -3,3 +3,5 @@
 - move the isAuth file to Utils folder
 - Move isMessageOwner to the message resolvers file
 - Add other roles and checks for content role based not just admin but an array of roles
+- TESTING
+- DataLoaders

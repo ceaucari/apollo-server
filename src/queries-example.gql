@@ -113,6 +113,26 @@ query {
   }
 }
 
+query {
+  messages(limit: 1, cursor: "2020-05-29T01:04:27.103Z") {
+    edges {
+      id
+      text
+      user {
+        id
+        username
+      }
+      createdAt
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+# Subscription ------------------------------------------
+
 subscription {
   messageCreated {
     message {
