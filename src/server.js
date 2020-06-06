@@ -4,6 +4,8 @@ import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
+const { existsSync, mkdirSync } = require('fs');
+const path = require('path');
 // import BasicLogging from './utils/BasicLogging';
 
 import schema from './schema';
@@ -25,6 +27,9 @@ const getMe = async req => {
     }
   }
 };
+
+existsSync(path.join(__dirname, '../images')) ||
+  mkdirSync(path.join(__dirname, '../images'));
 
 const server = new ApolloServer({
   // extensions: [() => new BasicLogging()],
@@ -61,6 +66,8 @@ const server = new ApolloServer({
     };
   },
 });
+
+app.use('/images', express.static(path.join(__dirname, '../images')));
 
 server.applyMiddleware({ app, path: '/graphql' });
 

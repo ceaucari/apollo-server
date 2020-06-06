@@ -1,8 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { combineResolvers } from 'graphql-resolvers';
 import { AuthenticationError, UserInputError } from 'apollo-server';
+const { createWriteStream, existsSync, mkdirSync } = require('fs');
+const path = require('path');
 
 import { isAdmin, isAuth } from './isAuth';
+
+export const files = [];
 
 const createToken = async (user, secret, expiresIn) => {
   const { id, email, username, role } = user;
@@ -26,6 +30,7 @@ export default {
 
       return await models.User.findByPk(me.id);
     },
+    files: () => files,
   },
 
   Mutation: {
@@ -75,6 +80,20 @@ export default {
         });
       }
     ),
+
+    uploadFile: async (_, { file }) => {
+      const { createReadStream, filename } = await file;
+
+      await new Promise(res =>
+        createReadStream()
+          .pipe(createWriteStream(path.join(__dirname, '../images', filename)))
+          .on('close', res)
+      );
+
+      files.push(filename);
+
+      return true;
+    },
   },
 
   User: {

@@ -5,6 +5,7 @@ export default gql`
     users: [User!]
     user(id: ID!): User
     me: User
+    files: [String]
   }
 
   extend type Mutation {
@@ -13,6 +14,8 @@ export default gql`
     signIn(login: String!, password: String!): Token!
 
     deleteUser(id: ID!): Boolean!
+
+    uploadFile(file: Upload!): Boolean
   }
 
   type Token {
