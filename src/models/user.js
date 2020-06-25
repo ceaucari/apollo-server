@@ -10,6 +10,14 @@ const user = (sequelize, DataTypes) => {
         notEmpty: true,
       },
     },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     email: {
       type: DataTypes.STRING,
       unique: true,
@@ -32,35 +40,38 @@ const user = (sequelize, DataTypes) => {
     },
   });
 
-  User.associate = models => {
+  User.associate = (models) => {
     User.hasMany(models.Message, { onDelete: 'CASCADE' });
   };
 
-  User.findByLogin = async login => {
-    let user = await User.findOne({
+  User.findByLogin = async (login) => {
+    let usr = await User.findOne({
       where: { username: login },
     });
 
-    if (!user) {
-      user = await User.findOne({
+    if (!usr) {
+      usr = await User.findOne({
         where: { email: login },
       });
     }
 
-    return user;
+    return usr;
   };
 
-  User.beforeCreate(async user => {
-    user.password = await user.generatePasswordHash();
+  User.beforeCreate(async (usr) => {
+    // eslint-disable-next-line no-param-reassign
+    usr.password = await usr.generatePasswordHash();
   });
 
-  User.prototype.generatePasswordHash = async function () {
+  User.prototype.generatePasswordHash = async function genHash() {
     const saltRounds = 10;
-    return await bcrypt.hash(this.password, saltRounds);
+    const hash = await bcrypt.hash(this.password, saltRounds);
+    return hash;
   };
 
-  User.prototype.validatePassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
+  User.prototype.validatePassword = async function validate(password) {
+    const pw = await bcrypt.compare(password, this.password);
+    return pw;
   };
 
   return User;

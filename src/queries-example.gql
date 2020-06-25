@@ -26,9 +26,14 @@ mutation {
 }
 
 mutation {
-  updateUser(username: "John Doe") {
+  updateUser(id: 2, username: "johndoe", firstName: "John", lastName: "Doe") {
+    id
     username
+    firstName
+    lastName
+    email
     role
+    createdAt
   }
 }
 

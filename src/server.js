@@ -4,8 +4,7 @@ import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
-const { existsSync, mkdirSync } = require('fs');
-const path = require('path');
+import createUsersWithMessages from './utils/populateDatabase';
 // import BasicLogging from './utils/BasicLogging';
 
 import schema from './schema';
@@ -16,7 +15,7 @@ const app = express();
 
 app.use(cors());
 
-const getMe = async req => {
+const getMe = async (req) => {
   const token = req.headers['x-token'];
 
   if (token) {
@@ -26,10 +25,8 @@ const getMe = async req => {
       throw new AuthenticationError('Your session expired. Sign in again.');
     }
   }
+  return null;
 };
-
-existsSync(path.join(__dirname, '../images')) ||
-  mkdirSync(path.join(__dirname, '../images'));
 
 const server = new ApolloServer({
   // extensions: [() => new BasicLogging()],
@@ -52,7 +49,7 @@ const server = new ApolloServer({
       };
     }
   },
-  formatError: error => {
+  formatError: (error) => {
     // remove the internal sequelize error message
     // leave only the important validation error
     const message = error.message
@@ -74,7 +71,7 @@ server.applyMiddleware({ app, path: '/graphql' });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-const eraseDatabaseOnSync = true;
+const eraseDatabaseOnSync = process.env.ERASE_DATABASE_ON_SYNC;
 
 sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
   if (eraseDatabaseOnSync) {
@@ -82,47 +79,7 @@ sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
   }
 
   httpServer.listen({ port: 8000 }, () => {
+    // eslint-disable-next-line no-console
     console.log('Apollo Server on http://localhost:8000/graphql');
   });
 });
-
-const createUsersWithMessages = async date => {
-  await models.User.create(
-    {
-      username: 'ccastillo',
-      email: 'ccastillo@test.com',
-      password: '12345678',
-      role: 'ADMIN',
-      messages: [
-        {
-          text: 'This is a message from CC',
-          createdAt: date.setSeconds(date.getSeconds() + 1),
-        },
-      ],
-    },
-    {
-      include: [models.Message],
-    }
-  );
-
-  await models.User.create(
-    {
-      username: 'jdoe',
-      email: 'jdoe@test.com',
-      password: '12345678',
-      messages: [
-        {
-          text: 'Happy to release ...',
-          createdAt: date.setSeconds(date.getSeconds() + 1),
-        },
-        {
-          text: 'Published a complete ...',
-          createdAt: date.setSeconds(date.getSeconds() + 1),
-        },
-      ],
-    },
-    {
-      include: [models.Message],
-    }
-  );
-};

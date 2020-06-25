@@ -1,34 +1,38 @@
 import jwt from 'jsonwebtoken';
 import { combineResolvers } from 'graphql-resolvers';
 import { AuthenticationError, UserInputError } from 'apollo-server';
-const { createWriteStream, existsSync, mkdirSync } = require('fs');
-const path = require('path');
 
 import { isAdmin, isAuth } from './isAuth';
+
+const { createWriteStream, existsSync, mkdirSync } = require('fs');
+const path = require('path');
 
 export const files = [];
 
 const createToken = async (user, secret, expiresIn) => {
   const { id, email, username, role } = user;
-  return await jwt.sign({ id, email, username, role }, secret, {
+  const token = await jwt.sign({ id, email, username, role }, secret, {
     expiresIn,
   });
+  return token;
 };
 
 export default {
   Query: {
     users: async (parent, args, { models }) => {
-      return await models.User.findAll();
+      const allUsers = await models.User.findAll();
+      return allUsers;
     },
     user: async (parent, { id }, { models }) => {
-      return await models.User.findByPk(id);
+      const someUser = await models.User.findByPk(id);
+      return someUser;
     },
     me: async (parent, args, { models, me }) => {
       if (!me) {
         return null;
       }
-
-      return await models.User.findByPk(me.id);
+      const myUser = await models.User.findByPk(me.id);
+      return myUser;
     },
     files: () => files,
   },
@@ -36,13 +40,14 @@ export default {
   Mutation: {
     signUp: async (
       parent,
-      { username, email, password },
+      { username, email, password, date },
       { models, secret }
     ) => {
       const user = await models.User.create({
         username,
         email,
         password,
+        createdAt: date,
       });
 
       return { token: createToken(user, secret, '90d') };
@@ -64,27 +69,24 @@ export default {
       return { token: createToken(user, secret, '90d') };
     },
 
-    // updateUser: combineResolvers(
-    //   isAuth,
-    //   async (parent, { username }, { models, me }) => {
-    //     const user = await models.User.findById(me.id);
-    //     return await user.update({ username });
-    //   }
-    // ),
-
-    deleteUser: combineResolvers(
-      isAdmin,
-      async (parent, { id }, { models }) => {
-        return await models.User.destroy({
-          where: { id },
-        });
+    updateUser: combineResolvers(
+      isAuth,
+      async (_, { username, firstName, lastName, role }, { models, me }) => {
+        const user = await models.User.findByPk(me.id);
+        return user.update({ username, firstName, lastName, role });
       }
     ),
+
+    deleteUser: combineResolvers(isAdmin, (_, { id }, { models }) => {
+      return models.User.destroy({
+        where: { id },
+      });
+    }),
 
     uploadFile: async (_, { file }) => {
       const { createReadStream, filename } = await file;
 
-      await new Promise(res =>
+      await new Promise((res) =>
         createReadStream()
           .pipe(createWriteStream(path.join(__dirname, '../images', filename)))
           .on('close', res)
@@ -98,11 +100,12 @@ export default {
 
   User: {
     messages: async (user, args, { models }) => {
-      return await models.Message.findAll({
+      const msgs = await models.Message.findAll({
         where: {
           userId: user.id,
         },
       });
+      return msgs;
     },
   },
 };
